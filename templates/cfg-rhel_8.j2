@@ -86,6 +86,9 @@ tar
 tuned
 #unzip
 yum-utils
+{% if packer_builder == 'vmware' %}
+open-vm-tools
+{% endif %}
 
 {% if boot_bios_uefi|bool|int == 1 %}
 efibootmgr
