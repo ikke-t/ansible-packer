@@ -7,7 +7,6 @@ Simple Ansible setup to build RHEL images with Packer.
 
 ## Quick Usage Example
 
-```
 ### Build latest RHEL 8 image on Qemu with all defaults
 
 Create playbook e.g. build_rhel_qemu.yml:
@@ -42,7 +41,6 @@ Create playbook e.g. build_rhel_qemu.yml:
             checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
       include_role:
         name: ansible-packer
-      tags: packer
 ```
 
 run playbook:
