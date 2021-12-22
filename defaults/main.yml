@@ -1,0 +1,5 @@
+---
+
+do_cleanup: true
+use_force: false
+packer_binary: /usr/bin/packer

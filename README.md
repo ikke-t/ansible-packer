@@ -1,4 +1,4 @@
-# Ansible Packer Playbook
+# Ansible Packer Role
 
 [![License: GPLv2](https://img.shields.io/badge/license-GPLv2-brightgreen.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![License: GPLv3](https://img.shields.io/badge/license-GPLv3-brightgreen.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -8,18 +8,90 @@ Simple Ansible setup to build RHEL images with Packer.
 ## Quick Usage Example
 
 ```
-# Build latest RHEL 8 image on Qemu with all defaults
-ansible-playbook packer.yml \
-  -e packer_builder=qemu -e packer_target=rhel_8
+### Build latest RHEL 8 image on Qemu with all defaults
 
-# Build RHEL 8.5 image on vSphere with customizations
-ansible-playbook packer.yml \
-  -e packer_builder=vmware -e packer_target=rhel_8_5 \
-  -e boot_password=foobar -e root_password=foobar \
-  -e bios_uefi_boot=true -e partitioning=auto \
-  -e security_profile=cis_server_l1 \
-  -e disable_ipv6=true \
-  -e image_name=test_image
+Create playbook e.g. build_rhel_qemu.yml:
+
+```
+---
+
+- name: Build RHEL image with Packer
+  hosts: all
+  become: true
+  tasks:
+
+    - debug:
+        var: cloud_user_password
+
+    - name: build rhel template for qemu
+      vars:
+        packer_builder: qemu
+        packer_target: rhel_8_5
+        boot_password: "{{ cloud_user_password }}"
+        root_password: "{{ cloud_user_password }}"
+        partitioning: auto
+        disable_ipv6: true
+        # security_profile: cis_server_l1
+        image_name: rhel_8_5_image
+        root_ssh_key: ssh-ed25519 xxxyyyzzz admin@coollab
+        output_directory: /VirtualMachines/templates
+        disk_size: 4096
+        iso:
+          rhel_8_5:
+            url: "file:///home/itengval/VirtualMachines/rhel-8.5-x86_64-dvd.iso"
+            checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+      include_role:
+        name: ansible-packer
+      tags: packer
+```
+
+run playbook:
+
+```
+ansible-playbook -i localhost, -c local build_rhel_qemu.yml
+```
+
+### Build latest RHEL 8 image on VMware with all defaults
+
+```
+---
+- name: Build RHEL template with Packer
+  hosts: all
+  become: true
+  tasks:
+
+    - name: build rhel template for vmware
+      vars:
+        vsphere_server: i-wish-this-was-openshift.mylab.com
+        vcenter_datacenter: MYDC
+        vcenter_folder: MYDC/Redhat
+        vcenter_cluster: LAB
+        vcenter_resource_pool:
+        vcenter_datastore: SVC-LUN-1
+        vsphere_network: vlan2102
+
+        packer_builder: vmware
+        packer_target: rhel_8_5
+        boot_password: "{{ cloud_user_password }}"
+        root_password: "{{ cloud_user_password }}"
+        partitioning: auto
+        disable_ipv6: true
+        # security_profile: cis_server_l1
+        image_name: rhel_8_5_image
+        root_ssh_key: ssh-ed25519 xxxyyyzzz admin@coollab
+        # disk_size: 4096
+        iso:
+          rhel_8_5:
+            url: "file:///home/itengval/VirtualMachines/rhel-8.5-x86_64-dvd.iso"
+            checksum: sha256:1f78e705cd1d8897a05afa060f77d81ed81ac141c2465d4763c0382aa96cadd0
+      include_role:
+        name: ansible-packer
+```
+
+run playbook:
+
+```
+ansible-playbook -i localhost, -c local build_rhel_vmware.yml
 ```
 
 ## Introduction
