@@ -146,3 +146,12 @@ sed -i -e 's,^OPTIONS=",OPTIONS="-4 ,g' -e 's, ",",' /etc/sysconfig/chronyd
 sed -i -e 's,^IPv6_rpfilter=yes,IPv6_rpfilter=no,' /etc/firewalld/firewalld.conf
 %end
 {% endif %}
+
+{% if root_ssh_key is defined %}
+%post
+mkdir /root/.ssh
+echo "{{ root_ssh_key }}" > /root/.ssh/authorized_keys
+chmod 755 /root/.ssh
+chmod 600 /root/.ssh
+%end
+{% endif %}
